@@ -66,57 +66,65 @@ class GUI:
 
 
     def compileFiles(self):
-        self.compileLabel["text"] = "Compiling..."
+		self.compileLabel["text"] = "Compiling..."
 
-        matrix = 0
+		matrix = np.empty((1,1),dtype=object)
+		list = []
 
-        with open(self.input_file, "r") as file:
+		with open(sys.argv[1], "r") as file:
 
-            line_count = 0
-            read_edges = False
+			line_count = 0
+			read_edges = False
+			for line in file:
 
-            for line in file:
+				line = line.replace("\n", "")
 
-                line = line.replace("\n", "")
+				if (read_edges == False) and (line == "#"):
 
-                if (read_edges == False) and (line == "#"):
+					matrix = np.empty((line_count+1, line_count+1), dtype=object)
 
-                    matrix = np.empty((line_count+1, line_count+1), dtype=object)
+					for i in range(1, line_count+1):
+						matrix[i,0] = list[i-1]
+						matrix[0,i] = list[i-1]
 
-                    for i in range(0, line_count+1):
-                        matrix[i,0] = str(i)
-                        matrix[0,i] = str(i)
-
-                    read_edges = True
-
-
-                elif read_edges == True:
-
-                    edge_params = line.split(' ')
-
-                    if (len(edge_params) > 2) and edge_params[2]:
-                        matrix[edge_params[0],edge_params[1]] = edge_params[2]
-
-    
-                line_count += 1
-
-            if read_edges == False:
-                self.compileLabel["text"] = "Error: Parsing tgf file failed due to #-divider"
+					read_edges = True
 
 
-            else:
+				elif read_edges == True:
 
-                with open(self.output_file, 'w') as file:
+					edge_params = line.split(' ')
 
-                    for i in range(0, matrix.shape[0]-1):
-                        for j in range(0, matrix.shape[0]-2):
+					if (len(edge_params) > 2) and edge_params[2]:
+						matrix[edge_params[1],edge_params[0]] = edge_params[2]
+						matrix[edge_params[0],edge_params[1]] = edge_params[2]
 
-                            file.write(str(matrix[i, j]) + ";")
+					else:
+						print edge_params[0]
 
-                        file.write(str(matrix[i, matrix.shape[0]-1]) + "\n")
+				if read_edges == False:
+					line_count += 1
+					list.append(line.split(" ",1)[1])
 
-                self.compileLabel["text"] = "Done!"
+			if read_edges == False:
+				self.compileLabel["text"] = "Error: Parsing tgf file failed due to #-divider"
 
+
+
+			else:
+
+				with open(self.output_file + ".csv", 'w') as file:
+
+					for i in range(0, matrix.shape[0]-1):
+						for j in range(0, matrix.shape[0]-2):
+
+							file.write(str(matrix[i, j]) + ";")
+
+						file.write(str(matrix[i, matrix.shape[0]-1]) + "\n")
+
+				self.compileLabel["text"] = "Done!"
+
+
+             
 
 
 
