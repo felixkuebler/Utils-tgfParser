@@ -16,12 +16,12 @@ if len(sys.argv) == 2 or len(sys.argv) == 3:
 		if len(sys.argv) == 3:
 			output_path = sys.argv[2].split(".")[0]
 
-		matrix = 0
+		matrix = np.empty((1,1),dtype=object)
+		list = []
+		line_count = 0
+		read_edges = False
 
 		with open(sys.argv[1], "r") as file:
-
-			line_count = 0
-			read_edges = False
 
 			for line in file:
 
@@ -29,11 +29,11 @@ if len(sys.argv) == 2 or len(sys.argv) == 3:
 
 				if (read_edges == False) and (line == "#"):
 
-					matrix = np.empty((line_count+1, line_count+1), dtype=object)
+					matrix = np.empty((line_count+1, line_count+1), dtype=str)
 
-					for i in range(0, line_count+1):
-						matrix[i,0] = str(i)
-						matrix[0,i] = str(i)
+					for i in range(1, line_count+1):
+						matrix[i,0] = list[i-1]
+						matrix[0,i] = list[i-1]
 
 					read_edges = True
 
@@ -43,10 +43,15 @@ if len(sys.argv) == 2 or len(sys.argv) == 3:
 					edge_params = line.split(' ')
 
 					if (len(edge_params) > 2) and edge_params[2]:
+						matrix[edge_params[1],edge_params[0]] = edge_params[2]
 						matrix[edge_params[0],edge_params[1]] = edge_params[2]
 
+					else:
+						print edge_params[0]
 	
-				line_count += 1
+				if read_edges == False:
+					line_count += 1
+					list.append(line.split(" ",1)[1])
 
 			if read_edges == False:
 				print "error parsing tgf due to #-divider"
